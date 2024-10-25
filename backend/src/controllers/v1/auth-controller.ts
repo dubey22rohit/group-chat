@@ -1,6 +1,6 @@
-import prisma from "../../config/db-config";
-import type { Request, Response } from "express";
+import type { Request, RequestHandler, Response } from "express";
 import jwt from "jsonwebtoken";
+import prisma from "../../config/db-config.js";
 interface LoginPayloadType {
   name: string;
   email: string;
@@ -30,15 +30,17 @@ class AuthController {
       const token = jwt.sign(JWTPayload, process.env.JWT_SECRET as string, {
         expiresIn: "365d",
       });
-      return res.status(200).json({
+      res.status(200).json({
         message: "logged in successfully",
         user: {
           ...findUser,
           token: `Bearer ${token}`,
         },
       });
+      return;
     } catch (error) {
-      return res.status(500).json({ message: "something went wrong" });
+      res.status(500).json({ message: "something went wrong" });
+      return;
     }
   }
 }

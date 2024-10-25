@@ -1,14 +1,20 @@
-FROM oven/bun:latest
+FROM node:latest
 
 WORKDIR /app
 
-COPY package.json bun.lockb ./
+COPY package*.json ./
+COPY bun.lockb ./
+
 RUN bun install
+
+COPY prisma ./prisma/
+
+RUN npx prisma generate
 
 COPY . .
 
 EXPOSE 4040
 
-CMD ["bun","run","index.ts"]
+CMD ["bun", "run", "index.ts"]
 
 

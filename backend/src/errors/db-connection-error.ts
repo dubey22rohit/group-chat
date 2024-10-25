@@ -1,4 +1,4 @@
-import { CustomError } from "./custom-error";
+import { CustomError } from "./custom-error.js";
 export class DBConnectionError extends CustomError {
   statusCode: number = 500;
   message = "error connecting to database";
