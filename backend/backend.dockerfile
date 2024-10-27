@@ -3,11 +3,10 @@ FROM node:latest
 WORKDIR /app
 
 COPY package*.json ./
-COPY bun.lockb ./
 
-RUN bun install
+RUN npm install
 
-COPY prisma ./prisma/
+COPY prisma ./prisma
 
 RUN npx prisma generate
 
@@ -15,6 +14,4 @@ COPY . .
 
 EXPOSE 4040
 
-CMD ["bun", "run", "index.ts"]
-
-
+CMD ["npm", "run", "dev"]

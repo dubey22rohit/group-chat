@@ -1,48 +1,140 @@
-import type { Request, RequestHandler, Response } from "express";
+import type { NextFunction, Request, Response } from "express";
 import jwt from "jsonwebtoken";
 import prisma from "../../config/db-config.js";
-interface LoginPayloadType {
-  name: string;
-  email: string;
-  oauth_id: string;
-  provider: string;
-  image: string;
-}
+import { BadRequestError } from "../../errors/bad-request-error.js";
+import { PasswordService } from "../../services/hash-service.js";
+import { DBConnectionError } from "../../errors/db-connection-error.js";
+import { TokenService } from "../../services/token-service.js";
+import { NotAuthorizedError } from "../../errors/not-authorized-error.js";
+
 class AuthController {
-  static async login(req: Request, res: Response) {
+  /**
+   * @description Register a new user
+   * @param {Request} req Request object
+   * @param {Response} res Response object
+   * @returns {Promise<void>}
+   */
+  public async register(req: Request, res: Response, next: NextFunction): Promise<void> {
+    const { username, email, password } = req.body;
     try {
-      const body: LoginPayloadType = req.body;
-      let findUser = await prisma.user.findUnique({
+      let existingUser = await prisma.user.findUnique({
         where: {
-          email: body.email,
+          username,
+          email,
         },
       });
-      if (!findUser) {
-        findUser = await prisma.user.create({
-          data: body,
-        });
+      if (existingUser) {
+        throw new BadRequestError("user already exists", 409);
       }
-      let JWTPayload = {
-        name: body.name,
-        email: body.email,
-        id: findUser.id,
-      };
-      const token = jwt.sign(JWTPayload, process.env.JWT_SECRET as string, {
-        expiresIn: "365d",
-      });
-      res.status(200).json({
-        message: "logged in successfully",
-        user: {
-          ...findUser,
-          token: `Bearer ${token}`,
-        },
-      });
-      return;
     } catch (error) {
-      res.status(500).json({ message: "something went wrong" });
+      next(error);
       return;
     }
+
+    let user;
+    try {
+      const passwordHash = await PasswordService.toHash(password);
+      user = await prisma.user.create({
+        data: {
+          email,
+          username,
+          passwordHash,
+        },
+      });
+    } catch (error) {
+      next(new DBConnectionError());
+      return;
+    }
+
+    const { accessToken, refreshToken } = TokenService.generateTokens({
+      id: user.id,
+      email: user.email,
+    });
+
+    await TokenService.storeRefreshToken(user.id, refreshToken);
+
+    res.cookie("refreshToken", refreshToken, {
+      maxAge: 1000 * 60 * 60 * 24 * 30,
+      httpOnly: true, //ClientJS won't be able to read it, only server will be able to read it
+    });
+
+    res.cookie("accessToken", accessToken, {
+      maxAge: 1000 * 60 * 60 * 24 * 30,
+      httpOnly: true, //ClientJS won't be able to read it, only server will be able to read it
+    });
+
+    // TODO: Create a DAO
+    const userObj = {
+      id: user.id,
+      email: user.email,
+      username: user.username,
+      image: user.image,
+    };
+
+    res.status(201).json({ userObj, message: "user created" });
+    return;
+  }
+
+  /**
+   * @description Log in an existing user
+   * @param {Request} req Request object
+   * @param {Response} res Response object
+   * @returns {Promise<void>}
+   */
+  public async login(req: Request, res: Response, next: NextFunction): Promise<void> {
+    const { email, password } = req.body;
+
+    const existingUser = await prisma.user.findUnique({ where: { email } });
+    if (!existingUser) {
+      next(new NotAuthorizedError());
+      return;
+    }
+
+    const passwordMatch = PasswordService.compare(password, existingUser.passwordHash);
+    if (!passwordMatch) {
+      next(new NotAuthorizedError());
+      return;
+    }
+
+    const { accessToken, refreshToken } = TokenService.generateTokens({
+      id: existingUser.id,
+      email: existingUser.email,
+    });
+
+    await TokenService.updateRefreshToken(existingUser.id, refreshToken);
+
+    res.cookie("refreshToken", refreshToken, {
+      maxAge: 1000 * 60 * 60 * 24 * 30,
+      httpOnly: true, //ClientJS won't be able to read it, only server will be able to read it
+    });
+
+    res.cookie("accessToken", accessToken, {
+      maxAge: 1000 * 60 * 60 * 24 * 30,
+      httpOnly: true, //ClientJS won't be able to read it, only server will be able to read it
+    });
+
+    // TODO: Create a DAO
+    const userObj = {
+      id: existingUser.id,
+      email: existingUser.email,
+      username: existingUser.username,
+      image: existingUser.image,
+    };
+
+    res.status(200).json({ userObj, message: "logged in successfully" });
+  }
+
+  public async logout(req: Request, res: Response) {
+    const { refreshToken } = req.cookies;
+
+    await TokenService.removeToken(refreshToken);
+
+    res.clearCookie("refreshToken");
+    res.clearCookie("accessToken");
+
+    res.json({ user: null, message: "log out successful" });
+    return;
   }
 }
 
-export default AuthController;
+export default new AuthController();

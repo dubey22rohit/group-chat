@@ -1,18 +1,21 @@
-version: '3.8'
+version: '3.9'
+
 services:
   app:
     build:
-      context: .
-      dockerfile: ./Dockerfile
+      context: ./backend
+      dockerfile: backend.dockerfile
     ports:
       - '4040:4040'
     depends_on:
       - postgres
+    restart: always
     env_file:
-      - ./.env
+      - ./backend/.env
   
   postgres:
     image: postgres:latest
+    restart: always
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: stairwaytoheaven

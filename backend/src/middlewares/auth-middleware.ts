@@ -8,7 +8,7 @@ const authMiddleware = (req: Request, res: Response, next: NextFunction) => {
   }
 
   const authToken = authHeader.split(" ")[1];
-  jwt.verify(authToken, process.env.JWT_SECRET as string, (err, user) => {
+  jwt.verify(authToken, process.env.JWT_ACCESS_TOKEN_SECRET as string, (err, user) => {
     if (err) {
       return res.status(401).json({ message: "unauthorized" });
     } else {
