@@ -7,3 +7,5 @@ export { default as refreshTokenRouter } from "./token/refresh-token.js";
 export { default as chatGroupRouter } from "./chat-group/chat-group.js";
 
 export { default as groupUsersRouter } from "./group-users/group-users.js";
+
+export { default as chatsRouter } from "./chats/chats.js";

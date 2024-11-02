@@ -8,6 +8,7 @@ import {
   logoutRouter,
   chatGroupRouter,
   groupUsersRouter,
+  chatsRouter,
 } from "./routes/v1/index.js";
 import { errorHandler } from "./middlewares/error-handler.js";
 import cookieParser from "cookie-parser";
@@ -48,6 +49,9 @@ app.use("/api", chatGroupRouter);
 
 // group users routes
 app.use("/api", groupUsersRouter);
+
+// chats routes
+app.use("/api", chatsRouter);
 
 // catches any errors thrown by the controller
 app.use(errorHandler);

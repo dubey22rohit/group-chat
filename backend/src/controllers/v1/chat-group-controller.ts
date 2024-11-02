@@ -4,12 +4,6 @@ import { CustomError } from "../../errors/custom-error.js";
 import { NotFoundError } from "../../errors/not-found-error.js";
 import { GenericError } from "../../errors/generic-error.js";
 class ChatGroupController {
-  /**
-   * Returns a list of chat groups for the current user
-   * @param req Express request object
-   * @param res Express response object
-   * @param next Express next function
-   */
   public async getAll(req: Request, res: Response, next: NextFunction) {
     try {
       const user = req.user;
@@ -30,12 +24,6 @@ class ChatGroupController {
     }
   }
 
-  /**
-   * Retrieves a single chat group by ID
-   * @param req Express request object
-   * @param res Express response object
-   * @param next Express next function
-   */
   public async getOne(req: Request, res: Response, next: NextFunction) {
     try {
       const { id } = req.params;
@@ -57,12 +45,6 @@ class ChatGroupController {
     }
   }
 
-  /**
-   * Creates a new chat group
-   * @param req Express request object
-   * @param res Express response object
-   * @param next Express next function
-   */
   public async create(req: Request, res: Response, next: NextFunction) {
     try {
       const { title, passcode } = req.body;

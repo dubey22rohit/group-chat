@@ -19,7 +19,6 @@ class GroupUsersController {
       res.status(200).json({ data: users, message: "users fetched successfully" });
       return;
     } catch (error) {
-      console.log(`getGroupUsers error`, error);
       next(error);
       return;
     }
@@ -33,7 +32,6 @@ class GroupUsersController {
       });
       res.status(201).json({ data: user, message: "user added successfully" });
     } catch (error) {
-      console.log(`addGroupUsers error`, error);
       next(error);
       return;
     }

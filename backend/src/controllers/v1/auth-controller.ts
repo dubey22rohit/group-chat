@@ -7,12 +7,6 @@ import { TokenService } from "../../services/token-service.js";
 import { NotAuthorizedError } from "../../errors/not-authorized-error.js";
 
 class AuthController {
-  /**
-   * @description Register a new user
-   * @param {Request} req Request object
-   * @param {Response} res Response object
-   * @returns {Promise<void>}
-   */
   public async register(req: Request, res: Response, next: NextFunction): Promise<void> {
     const { username, email, password } = req.body;
     try {
@@ -66,12 +60,6 @@ class AuthController {
     return;
   }
 
-  /**
-   * @description Log in an existing user
-   * @param {Request} req Request object
-   * @param {Response} res Response object
-   * @returns {Promise<void>}
-   */
   public async login(req: Request, res: Response, next: NextFunction): Promise<void> {
     const { email, password } = req.body;
 
