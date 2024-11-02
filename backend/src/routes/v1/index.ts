@@ -3,3 +3,5 @@ export { default as loginRouter } from "./auth/login.js";
 export { default as logoutRouter } from "./auth/logout.js";
 
 export { default as refreshTokenRouter } from "./token/refresh-token.js";
+
+export { default as chatGroupRouter } from "./chat-group/chat-group.js";

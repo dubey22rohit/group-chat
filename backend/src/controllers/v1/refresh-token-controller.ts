@@ -58,7 +58,7 @@ class RefreshTokenController {
       httpOnly: true,
     });
 
-    res.status(201).json({ user });
+    res.status(201).json({ data: user });
   }
 }
 

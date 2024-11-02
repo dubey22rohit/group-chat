@@ -1,5 +1,4 @@
 import type { NextFunction, Request, Response } from "express";
-import jwt from "jsonwebtoken";
 import prisma from "../../config/db-config.js";
 import { BadRequestError } from "../../errors/bad-request-error.js";
 import { PasswordService } from "../../services/hash-service.js";
@@ -63,15 +62,7 @@ class AuthController {
       httpOnly: true, //ClientJS won't be able to read it, only server will be able to read it
     });
 
-    // TODO: Create a DAO
-    const userObj = {
-      id: user.id,
-      email: user.email,
-      username: user.username,
-      image: user.image,
-    };
-
-    res.status(201).json({ userObj, message: "user created" });
+    res.status(201).json({ data: accessToken, message: "user created" });
     return;
   }
 
@@ -113,15 +104,7 @@ class AuthController {
       httpOnly: true, //ClientJS won't be able to read it, only server will be able to read it
     });
 
-    // TODO: Create a DAO
-    const userObj = {
-      id: existingUser.id,
-      email: existingUser.email,
-      username: existingUser.username,
-      image: existingUser.image,
-    };
-
-    res.status(200).json({ userObj, message: "logged in successfully" });
+    res.status(200).json({ data: accessToken, message: "logged in successfully" });
   }
 
   public async logout(req: Request, res: Response) {
@@ -132,7 +115,7 @@ class AuthController {
     res.clearCookie("refreshToken");
     res.clearCookie("accessToken");
 
-    res.json({ user: null, message: "log out successful" });
+    res.json({ data: null, message: "log out successful" });
     return;
   }
 }
