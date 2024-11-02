@@ -10,19 +10,23 @@ import {
   groupUsersRouter,
   chatsRouter,
 } from "./routes/v1/index.js";
+import { createAdapter } from "@socket.io/redis-streams-adapter";
 import { errorHandler } from "./middlewares/error-handler.js";
 import cookieParser from "cookie-parser";
 import { Server } from "socket.io";
 import { socketInit } from "./socket.js";
+import redis from "./config/redis.js";
+
 const app = express();
 const PORT = process.env.PORT;
 
 const server = createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: "*",
+    origin: [process.env.CLIENT_APP_URL, "https://admin.socket.io"],
     methods: ["GET", "POST"],
   },
+  adapter: createAdapter(redis),
 });
 
 socketInit(io);

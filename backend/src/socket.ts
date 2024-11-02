@@ -10,10 +10,12 @@ export const socketInit = (io: Server) => {
     const room = socket.handshake.auth.room || socket.handshake.headers.room;
     console.log(`ROOM`, room);
     if (!room) {
-      return next(new NotFoundError("room not found"));
+      //   return next(new NotFoundError("room not found"));
+      console.log(`NO ROOM`);
+      return;
     }
     socket.room = room;
-    next();
+    // next();
   });
 
   io.on("connection", (socket: CustomSocket) => {
