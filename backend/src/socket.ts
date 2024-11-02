@@ -1,5 +1,6 @@
 import { Server, Socket } from "socket.io";
 import { NotFoundError } from "./errors/not-found-error.js";
+import { produceMessage } from "./streaming.js";
 
 interface CustomSocket extends Socket {
   room?: string;
@@ -15,23 +16,19 @@ export const socketInit = (io: Server) => {
       return;
     }
     socket.room = room;
-    // next();
+    next();
   });
 
   io.on("connection", (socket: CustomSocket) => {
-    console.log(`CONENCTION MADE`, socket.room);
     socket.emit("message", socket.id);
     socket.join(socket.room);
 
     socket.on("message", async (data) => {
       try {
-        // Produce message
-        console.log(`message received`, data);
-        socket.emit("message", `${data} to you too!`);
+        await produceMessage("chats", data);
       } catch (error) {
         console.log(`message error`, error);
       }
-      socket.to(socket.room).emit("message", data);
     });
 
     socket.on("disconnect", () => {

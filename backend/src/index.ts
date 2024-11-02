@@ -15,7 +15,9 @@ import { errorHandler } from "./middlewares/error-handler.js";
 import cookieParser from "cookie-parser";
 import { Server } from "socket.io";
 import { socketInit } from "./socket.js";
-import redis from "./config/redis.js";
+import redis from "./config/redis-config.js";
+import { connectKafkaProducer } from "./config/kafka-config.js";
+import { consumeMessages } from "./streaming.js";
 
 const app = express();
 const PORT = process.env.PORT;
@@ -59,5 +61,9 @@ app.use("/api", chatsRouter);
 
 // catches any errors thrown by the controller
 app.use(errorHandler);
+
+connectKafkaProducer().catch((err) => console.log("kafka producer error", err));
+
+consumeMessages(process.env.KAFKA_TOPIC!).catch((err) => console.log("kafka consumer error", err));
 
 server.listen(PORT, () => console.log(`Server is running on PORT ${PORT}`));

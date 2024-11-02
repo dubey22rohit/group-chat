@@ -1,6 +1,0 @@
-{
-  "dependencies": {
-    "@socket.io/redis-streams-adapter": "^0.2.2",
-    "ioredis": "^5.4.1"
-  }
-}
